@@ -1,8 +1,52 @@
 {
   "version": 3,
   "configurePresets": [
-    {"name": "vs2022", "displayName": "Windows Visual Studio 2022 x64", "generator": "Visual Studio 17 2022", "architecture": "x64", "binaryDir": "${sourceDir}/build/windows"}
+    {
+      "name": "vs2022",
+      "displayName": "Windows Visual Studio 2022 x64",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/windows"
+    },
+    {
+      "name": "mingw",
+      "displayName": "Windows VS Code / MinGW GCC",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build/mingw",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    }
   ],
-  "buildPresets": [{"name": "release", "configurePreset": "vs2022", "configuration": "Release"}],
-  "testPresets": [{"name": "release", "configurePreset": "vs2022", "configuration": "Release", "output": {"outputOnFailure": true}}]
+  "buildPresets": [
+    {
+      "name": "release",
+      "configurePreset": "vs2022",
+      "configuration": "Release"
+    },
+    {
+      "name": "mingw-release",
+      "configurePreset": "mingw",
+      "jobs": 4
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "release",
+      "configurePreset": "vs2022",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "mingw-release",
+      "configurePreset": "mingw",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
 }

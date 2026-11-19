@@ -26,8 +26,8 @@ void Camera::preset(int v) {
   desiredYaw = (v == 2 || v == 4) ? 1.570796f : 0.f;
   desiredPitch = v == 3 ? 1.55f : 0;
   if (v == 0) {
-    desiredYaw = .25f;
-    desiredPitch = .24f;
+    desiredYaw = .45f;
+    desiredPitch = .18f;
   }
 }
 void Camera::fit(glm::vec3 c, float r, float aspect) {
@@ -47,4 +47,26 @@ void Camera::pan(float dx, float dy, float h) {
   auto right = glm::normalize(glm::cross(target - eye(), glm::vec3(0, 1, 0)));
   auto up = glm::normalize(glm::cross(right, target - eye()));
   desiredTarget += (-right * dx + up * dy) * distance * .85f / h;
+}
+
+void Camera::fitBounds(glm::vec3 minimum, glm::vec3 maximum, float aspect) {
+  desiredTarget = (minimum + maximum) / 2.f;
+  auto direction = glm::vec3(std::sin(desiredYaw) * std::cos(desiredPitch),
+                             std::sin(desiredPitch),
+                             std::cos(desiredYaw) * std::cos(desiredPitch));
+  auto rotation =
+      glm::mat3(glm::lookAt(direction, glm::vec3(0), glm::vec3(0, 1, 0)));
+  float tangent = std::tan(glm::radians(23.f)), distance = 3;
+  for (int x = 0; x < 2; ++x)
+    for (int y = 0; y < 2; ++y)
+      for (int z = 0; z < 2; ++z) {
+        auto point = rotation * (glm::vec3(x ? maximum.x : minimum.x,
+                                           y ? maximum.y : minimum.y,
+                                           z ? maximum.z : minimum.z) -
+                                 desiredTarget);
+        float required = std::max(std::abs(point.x) / (tangent * aspect),
+                                  std::abs(point.y) / tangent);
+        distance = std::max(distance, required * 1.08f + (ortho ? 0 : point.z));
+      }
+  desiredDistance = glm::clamp(distance, 3.f, 2000.f);
 }
